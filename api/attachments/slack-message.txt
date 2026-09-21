@@ -1,0 +1,7 @@
+Channel: #lab-incidents
+From: Lisa Chen
+Time: 21 Sep 2026, 08:14
+
+Incubator IC-12 shows 39.2 °C instead of 37 °C.
+Batches MB-24091 and MB-24092 are inside.
+Photo of the display attached. Taking it out of service now.
