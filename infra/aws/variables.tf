@@ -11,9 +11,9 @@ variable "aws_region" {
 }
 
 variable "instance_type" {
-  description = "Free-tier eligible instance type (t2.micro or t3.micro)."
+  description = "EC2 size. t3.small (2 GB) is the default so Docker can build and run the stack."
   type        = string
-  default     = "t3.micro"
+  default     = "t3.small"
 }
 
 variable "allowed_cidr" {

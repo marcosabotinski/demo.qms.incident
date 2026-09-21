@@ -31,7 +31,9 @@ Vite proxies `/api` and `/demo` to the API on port 4000.
 
 ## Deploy to AWS
 
-`scripts/deploy-aws.sh` creates a free-tier eligible `t3.micro` in `us-east-1`, attaches an NSG (security group) that allows HTTP `:80` and SSH only from **your current public IP**, copies this repo onto the VM, and starts `compose.aws.yml` (Postgres + API + nginx frontend).
+`scripts/deploy-aws.sh` creates a `t3.small` in `us-east-1`, attaches an NSG (security group) that allows HTTP `:80` and SSH only from **your current public IP**, copies this repo onto the VM, and starts `compose.aws.yml` (Postgres + API + nginx frontend).
+
+Stop the instance when you are not demoing it. Compute and the public IPv4 fee stop; the 8 GB root volume is about **$0.64/month**. `./scripts/destroy-aws.sh` is the $0 teardown.
 
 ```bash
 # needs terraform + AWS credentials (env vars or ~/.aws)

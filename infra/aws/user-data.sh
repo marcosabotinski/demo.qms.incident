@@ -2,7 +2,7 @@
 set -euxo pipefail
 exec > >(tee /var/log/qms-bootstrap.log) 2>&1
 
-# Keep the free-tier instance usable while Docker builds Node images.
+# Extra headroom while Docker builds the Node images.
 if [[ ! -f /swapfile ]]; then
   dd if=/dev/zero of=/swapfile bs=1M count=2048 status=none
   chmod 600 /swapfile

@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-# Provision a free-tier EC2 VM, lock HTTP/SSH to this machine's public IP,
+# Provision a t3.small EC2 VM, lock HTTP/SSH to this machine's public IP,
 # copy the demo onto the instance, and start the full compose stack on port 80.
 set -euo pipefail
 
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   cat <<'EOF'
-Deploy the QMS demo to a free-tier EC2 VM.
+Deploy the QMS demo to a t3.small EC2 VM.
 
   ./scripts/deploy-aws.sh
 
 Needs Terraform and AWS credentials. Optional env:
   ALLOWED_CIDR    CIDR allowed to hit :80 and :22 (default: this machine's public IP)
   AWS_REGION      default us-east-1
-  INSTANCE_TYPE   default t3.micro
+  INSTANCE_TYPE   default t3.small
 EOF
   exit 0
 fi
@@ -118,7 +118,7 @@ else
     -cf - . | ssh "${SSH_OPTS[@]}" "$SSH_USER@$PUBLIC_IP" 'tar -C /opt/qms -xf -'
 fi
 
-echo "Starting the compose stack (first build on t3.micro can take several minutes)..."
+echo "Starting the compose stack (first image build can take several minutes)..."
 ssh "${SSH_OPTS[@]}" "$SSH_USER@$PUBLIC_IP" \
   'cd /opt/qms && sudo docker compose -f compose.aws.yml up --build -d'
 

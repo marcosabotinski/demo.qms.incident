@@ -67,10 +67,17 @@ else
 fi
 
 help_out="$("$ROOT/scripts/deploy-aws.sh" --help)"
-if [[ "$help_out" == *"ALLOWED_CIDR"* && "$help_out" == *"t3.micro"* ]]; then
+if [[ "$help_out" == *"ALLOWED_CIDR"* && "$help_out" == *"t3.small"* ]]; then
   echo "ok  deploy-aws.sh --help"
 else
   echo "FAIL: deploy-aws.sh --help output" >&2
+  failed=1
+fi
+
+if grep -q 'default     = "t3.small"' "$ROOT/infra/aws/variables.tf"; then
+  echo "ok  terraform default instance_type is t3.small"
+else
+  echo "FAIL: expected instance_type default t3.small" >&2
   failed=1
 fi
 
