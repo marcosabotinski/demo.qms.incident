@@ -29,6 +29,27 @@ cd web && npm install && npm run dev
 
 Vite proxies `/api` and `/demo` to the API on port 4000.
 
+## Deploy to AWS
+
+`scripts/deploy-aws.sh` creates a free-tier eligible `t3.micro` in `us-east-1`, attaches an NSG (security group) that allows HTTP `:80` and SSH only from **your current public IP**, copies this repo onto the VM, and starts `compose.aws.yml` (Postgres + API + nginx frontend).
+
+```bash
+# needs terraform + AWS credentials (env vars or ~/.aws)
+./scripts/deploy-aws.sh
+```
+
+The script prints `http://<public-ip>`. Postgres and the API are not published on the host; nginx on port 80 proxies `/api` and `/demo`.
+
+Optional env vars: `ALLOWED_CIDR` (skip IP detection), `AWS_REGION`, `INSTANCE_TYPE`.
+
+State lives at `infra/aws/terraform.tfstate` (local backend). Commit it if you want to keep the VM in git. The operator key stays in `infra/aws/.ssh/` and is gitignored.
+
+Tear down:
+
+```bash
+./scripts/destroy-aws.sh
+```
+
 ## Seeded records
 
 | ID | Status | Notes |
