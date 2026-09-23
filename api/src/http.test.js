@@ -27,6 +27,7 @@ describe("http create/list/detail/attachments", () => {
     const res = await fetch(`${base}/api/incidents`);
     assert.equal(res.status, 200);
     const rows = await res.json();
+    assert.ok(rows.length >= 480 && rows.length <= 520);
     assert.ok(rows.some((r) => r.id === "INC-2026-0142"));
   });
 

@@ -1,3 +1,7 @@
+import { ENUMS } from "./schema.js";
+
+export const TARGET_SEED_COUNT = 500;
+
 export const seedRecords = [
   {
     id: "INC-2026-0142",
@@ -458,3 +462,351 @@ export const seedRecords = [
     ],
   },
 ];
+
+const PEOPLE = [
+  { name: "Lisa Chen", role: "Lab Technician", email: "lisa.chen@lab.example" },
+  { name: "Tom Berger", role: "Lab Supervisor", email: "tom.berger@lab.example" },
+  { name: "Maria Alvarez", role: "QA Reviewer", email: "maria.alvarez@lab.example" },
+  { name: "Jonas Weber", role: "Analyst", email: "jonas.weber@lab.example" },
+  { name: "Priya Nair", role: "QC Specialist", email: "priya.nair@lab.example" },
+  { name: "Elena Rossi", role: "Microbiologist", email: "elena.rossi@lab.example" },
+];
+
+const OWNERS = ["Maria Alvarez", "Tom Berger", "Priya Nair", null];
+
+const AREAS = {
+  Microbiology: ["MB-Lab 1", "MB-Lab 2", "Incubation suite"],
+  "QC Chemistry": ["Weigh room", "HPLC lab", "Stability suite"],
+  "Sample Receipt": ["Goods-in", "Cold store", "Aliquot bench"],
+};
+
+const PRODUCTS = ["Product X", "Product Y", "Product Z", "QC strain E. coli"];
+
+const SCENARIOS = [
+  {
+    category: "Equipment",
+    subcategory: "Temperature excursion",
+    title: (n) => `Temperature excursion – Incubator IC-${String((n % 40) + 1).padStart(2, "0")}`,
+    summary: (n) => `Incubator IC-${String((n % 40) + 1).padStart(2, "0")} drifted above the 37.0 °C setpoint.`,
+    description:
+      "Chamber display exceeded the validated range. In-process samples were secured and facilities was notified.",
+    immediateActions: "Samples secured. Equipment taken out of service. QA notified.",
+    department: "Microbiology",
+    processStep: "Incubation",
+    expectedValue: "37.0 ± 1.0",
+    actualValue: "39.1",
+    unit: "°C",
+  },
+  {
+    category: "Equipment",
+    subcategory: "Calibration drift",
+    title: (n) => `Balance drift during weigh-in – BAL-${String((n % 20) + 1).padStart(2, "0")}`,
+    summary: (n) => `Analytical balance BAL-${String((n % 20) + 1).padStart(2, "0")} failed the daily check weight.`,
+    description: "Daily check weight was outside tolerance. Weighings since the last passing check are under review.",
+    immediateActions: "Balance taken out of use. Facilities ticket opened.",
+    department: "QC Chemistry",
+    processStep: "Weigh-in",
+    expectedValue: "100.000 ± 0.100 mg",
+    actualValue: "100.350",
+    unit: "mg",
+  },
+  {
+    category: "Sample Handling",
+    subcategory: "Missed timepoint",
+    title: (n) => `Missed stability pull – Chamber ST-${String((n % 12) + 1).padStart(2, "0")}`,
+    summary: "Scheduled stability pull was completed one calendar day late.",
+    description: "LIMS overdue alert fired after the protocol timepoint. Samples remained in specified storage.",
+    immediateActions: "Samples pulled, labelled late, QA notified.",
+    department: "QC Chemistry",
+    processStep: "Stability pull",
+    expectedValue: "On-time pull",
+    actualValue: "Pulled +1 day",
+    unit: null,
+  },
+  {
+    category: "Sample Handling",
+    subcategory: "Identity",
+    title: () => "Sample receipt label mismatch",
+    summary: "Courier paperwork and vial label IDs did not match at goods-in.",
+    description: "Companion samples arrived together. Paperwork and vial IDs disagreed. Samples were quarantined.",
+    immediateActions: "Quarantine. Courier contacted. Customer notified.",
+    department: "Sample Receipt",
+    processStep: "Receipt",
+    expectedValue: "Label matches CoA",
+    actualValue: "IDs differ",
+    unit: null,
+  },
+  {
+    category: "Method",
+    subcategory: "System suitability",
+    title: (n) => `HPLC system suitability failure – HPLC-${String((n % 8) + 1).padStart(2, "0")}`,
+    summary: "System suitability failed plate count before the sample sequence.",
+    description: "Column pressure and plate count were outside the method limits. Sequence was not started.",
+    immediateActions: "Run aborted. Column reserved. Method owner notified.",
+    department: "QC Chemistry",
+    processStep: "System suitability",
+    expectedValue: "N ≥ 5000",
+    actualValue: "4120",
+    unit: null,
+  },
+  {
+    category: "Reagent",
+    subcategory: "Expired material",
+    title: (n) => `Expired reagent used in assay – LOT-${String(2400 + (n % 80)).padStart(4, "0")}`,
+    summary: "A reagent lot past its expiry was scanned into an in-process assay.",
+    description: "LIMS scan accepted an expired lot after a weekend expiry rollover. Work was stopped.",
+    immediateActions: "Assay halted. Lot quarantined. Remaining inventory checked.",
+    department: "Microbiology",
+    processStep: "Reagent prep",
+    expectedValue: "In-date lot",
+    actualValue: "Expired",
+    unit: null,
+  },
+  {
+    category: "Data Integrity",
+    subcategory: "Audit trail",
+    title: () => "Missing audit-trail review on chromatography run",
+    summary: "Weekly audit-trail review was not completed before result release.",
+    description: "Reviewer absence left the weekly chromatography audit-trail unsigned. Results were held.",
+    immediateActions: "Results held. Backup reviewer assigned.",
+    department: "QC Chemistry",
+    processStep: "Data review",
+    expectedValue: "Review complete",
+    actualValue: "Unsigned",
+    unit: null,
+  },
+  {
+    category: "Facility",
+    subcategory: "Environmental",
+    title: (n) => `Cleanroom pressure alarm – Grade ${n % 2 ? "C" : "D"}`,
+    summary: "Differential pressure dropped below the alert limit for more than 15 minutes.",
+    description: "AHU interlock recovered after the alarm. Personnel were already clear of the room.",
+    immediateActions: "Room access restricted. Facilities acknowledged the alarm.",
+    department: "Microbiology",
+    processStep: "Environmental monitoring",
+    expectedValue: "≥ 10 Pa",
+    actualValue: "4 Pa",
+    unit: "Pa",
+  },
+  {
+    category: "Personnel",
+    subcategory: "Training",
+    title: () => "Analyst performed method without current training",
+    summary: "A method was executed after the analyst's training record had lapsed.",
+    description: "LMS showed training expired two days earlier. Results were not released.",
+    immediateActions: "Work stopped. Supervisor informed. Training retriggered.",
+    department: "QC Chemistry",
+    processStep: "Testing",
+    expectedValue: "Current training",
+    actualValue: "Expired",
+    unit: null,
+  },
+  {
+    category: "Documentation",
+    subcategory: "Incomplete record",
+    title: () => "Incomplete batch worksheet at second-person review",
+    summary: "Required fields were blank when the worksheet reached second-person review.",
+    description: "Balance ID and check-weight fields were empty. Reviewer rejected the packet.",
+    immediateActions: "Packet returned. Testing not released.",
+    department: "Sample Receipt",
+    processStep: "Documentation",
+    expectedValue: "Complete worksheet",
+    actualValue: "Blank fields",
+    unit: null,
+  },
+];
+
+function mulberry32(seed) {
+  return function rng() {
+    let t = (seed += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function pick(rng, list) {
+  return list[Math.floor(rng() * list.length)];
+}
+
+function pad(n) {
+  return String(n).padStart(4, "0");
+}
+
+function berlinStamp(year, dayOffset, hour, minute) {
+  const start = Date.UTC(year, 0, 1, 0, 0, 0);
+  const d = new Date(start + dayOffset * 86400000);
+  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  const hh = String(hour).padStart(2, "0");
+  const mm = String(minute).padStart(2, "0");
+  return `${year}-${month}-${day}T${hh}:${mm}:00+02:00`;
+}
+
+function volumeId(index, recordType) {
+  let year;
+  let seq;
+  if (index < 200) {
+    year = 2024;
+    seq = index + 1;
+  } else if (index < 400) {
+    year = 2025;
+    seq = index - 199;
+  } else {
+    year = 2026;
+    seq = index - 399;
+  }
+  const prefix = recordType === "Deviation" && year < 2026 ? "DEV" : "INC";
+  return `${prefix}-${year}-${pad(seq)}`;
+}
+
+function isBlockedId(id) {
+  const reserved = new Set(seedRecords.map((r) => r.id));
+  if (reserved.has(id)) return true;
+  const match = id.match(/^(?:INC|DEV)-(\d{4})-(\d{4})$/);
+  if (!match) return false;
+  const year = Number(match[1]);
+  const seq = Number(match[2]);
+  // nextIncidentId starts at 143 for the current calendar year after reset.
+  return year === new Date().getFullYear() && seq >= 143;
+}
+
+export function generateVolumeRecords(count = TARGET_SEED_COUNT - seedRecords.length) {
+  const rng = mulberry32(20260921);
+  const records = [];
+  let index = 0;
+  while (records.length < count) {
+    const scenario = SCENARIOS[index % SCENARIOS.length];
+    const recordType =
+      index % 17 === 0 ? "Deviation" : index % 31 === 0 ? "Lab Investigation" : "Incident";
+    const id = volumeId(index, recordType);
+    index += 1;
+    if (isBlockedId(id)) continue;
+
+    const status = pick(rng, ENUMS.status);
+    const priority = pick(rng, ENUMS.priority);
+    const department = scenario.department || pick(rng, ENUMS.department);
+    const sourceChannel = pick(rng, ENUMS.sourceChannel);
+    const reporter = pick(rng, PEOPLE);
+    const owner = ["Draft", "Submitted"].includes(status) ? pick(rng, OWNERS) : pick(rng, OWNERS.filter(Boolean));
+    const year = Number(id.slice(4, 8));
+    const maxDay = year === 2026 ? 260 : 364;
+    const dayOffset = Math.floor(rng() * maxDay);
+    const hour = 7 + Math.floor(rng() * 10);
+    const minute = Math.floor(rng() * 60);
+    const occurredAt = berlinStamp(year, dayOffset, hour, minute);
+    const discoveredAt = berlinStamp(year, dayOffset, hour, Math.min(59, minute + 5));
+    const reportedAt = berlinStamp(year, dayOffset, hour, Math.min(59, minute + 12));
+    const product = pick(rng, PRODUCTS);
+    const batchNo = `${department === "Microbiology" ? "MB" : "CH"}-${year % 100}${pad((index % 9000) + 100)}`;
+    const closed = ["Closed", "Cancelled", "Not a Deviation"].includes(status);
+    const investigating = ["Investigation", "CAPA Required", "No CAPA", "Pending QA Approval", "Approved"].includes(
+      status
+    );
+
+    records.push({
+      id,
+      recordType,
+      title: scenario.title(index),
+      status,
+      priority,
+      sourceChannel,
+      sourceRef: sourceChannel === "Manual" ? null : `${sourceChannel.toUpperCase()}-${id}`,
+      site: "Berlin Lab",
+      department,
+      area: pick(rng, AREAS[department] || ["Lab"]),
+      occurredAt,
+      discoveredAt,
+      reportedAt,
+      reportedByName: reporter.name,
+      reportedByRole: reporter.role,
+      reportedByEmail: reporter.email,
+      owner,
+      summary: typeof scenario.summary === "function" ? scenario.summary(index) : scenario.summary,
+      description: scenario.description,
+      immediateActions: scenario.immediateActions,
+      category: scenario.category,
+      subcategory: scenario.subcategory,
+      nature: pick(rng, ENUMS.nature),
+      isRepeat: rng() < 0.08,
+      relatedEventIds: [],
+      equipmentName: null,
+      equipmentId: null,
+      methodName: null,
+      sopId: null,
+      processStep: scenario.processStep,
+      expectedValue: scenario.expectedValue,
+      actualValue: scenario.actualValue,
+      unit: scenario.unit,
+      limsSampleIds: rng() < 0.5 ? [`S-${50000 + index}`] : [],
+      batchLots:
+        rng() < 0.45
+          ? [
+              {
+                product,
+                batchNo,
+                stage: pick(rng, ENUMS.batchStage),
+                quantity: null,
+                impactUnknown: true,
+              },
+            ]
+          : [],
+      productNames: rng() < 0.4 ? [product] : [],
+      reagentLots: [],
+      classification: investigating || closed ? pick(rng, ["Incident only", "Deviation", "OOS", "OOT"]) : null,
+      gxpType: pick(rng, ["GMP", "ISO 17025", "GLP"]),
+      productImpact: investigating || closed ? pick(rng, ["None", "Possible", "Unknown"]) : null,
+      patientSafetyImpact: investigating || closed ? pick(rng, ["None", "N/A", "Possible"]) : null,
+      dataIntegrityImpact: investigating || closed ? pick(rng, ["None", "Possible"]) : null,
+      reportabilityImpact: null,
+      regulatoryImpact: null,
+      impactRationale: investigating || closed ? "Generated volume record for inbox and dashboard exercises." : null,
+      containmentNeeded: rng() < 0.3,
+      containmentActions: null,
+      disposition: closed ? pick(rng, ["Use as is", "Retest", "Quarantine", "N/A"]) : null,
+      investigationRequired: investigating || closed,
+      investigationOwner: investigating || closed ? owner : null,
+      investigationDueDate: null,
+      investigationSummary: closed ? "Closed after routine review of the generated demo record." : null,
+      rootCauseMethod: closed ? "5 Whys" : null,
+      rootCause: closed ? "Demo volume record — root cause recorded for realism." : null,
+      rootCauseCategory: closed ? pick(rng, ["Method", "Equipment", "Personnel"]) : null,
+      contributingFactors: [],
+      similarEventsReviewed: null,
+      capaRequired: closed ? rng() < 0.4 : null,
+      capaJustification: null,
+      capaIds: [],
+      effectivenessCheckRequired: null,
+      capaActions: [],
+      attachments: [],
+      attachmentCount: 0,
+      qaReviewer: investigating || closed ? "Maria Alvarez" : null,
+      qaDecision: closed ? "Approve as incident" : null,
+      qaComments: null,
+      approvedAt: closed ? reportedAt : null,
+      closedAt: closed ? berlinStamp(year, Math.min(maxDay, dayOffset + 14), 16, 0) : null,
+      closureSummary: closed ? "Closed in demo seed volume set." : null,
+      electronicSignature: null,
+      linkedIncidents: [],
+      linkedDeviations: [],
+      linkedCapas: [],
+      linkedSops: [],
+      linkedEquipment: [],
+      linkedChangeControls: [],
+      draftedFromSlack: sourceChannel === "Slack",
+      auditTrail: [
+        {
+          at: reportedAt,
+          actor: reporter.name,
+          action: "Created record",
+          from: null,
+          to: "Draft",
+          comment: `Generated volume record ${id}`,
+        },
+      ],
+    });
+  }
+  return records;
+}
+
+export const allSeedRecords = [...seedRecords, ...generateVolumeRecords()];

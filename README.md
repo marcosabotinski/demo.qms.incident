@@ -48,6 +48,8 @@ Exercise titles are in `LAB.md`. `.cursor/rules` is empty on purpose.
 
 ## Seeded records
 
+About **500** incidents are seeded so the inbox and future dashboard exercises have realistic volume. Four featured records stay hand-crafted for walkthroughs; the rest are generated in `api/src/seed.js`.
+
 | ID | Status | Notes |
 |---|---|---|
 | `INC-2026-0142` | Draft | Slack bot temperature excursion |

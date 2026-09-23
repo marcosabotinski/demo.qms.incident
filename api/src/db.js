@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { seedRecords } from "./seed.js";
+import { allSeedRecords } from "./seed.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -106,8 +106,8 @@ function insertRecord(database, rec) {
 export function seedIfEmpty(database = getDb()) {
   const { n } = database.prepare("SELECT COUNT(*) AS n FROM incidents").get();
   if (n > 0) return { inserted: 0, total: n };
-  for (const rec of seedRecords) insertRecord(database, rec);
-  return { inserted: seedRecords.length, total: seedRecords.length };
+  for (const rec of allSeedRecords) insertRecord(database, rec);
+  return { inserted: allSeedRecords.length, total: allSeedRecords.length };
 }
 
 export function seedDemoRecords(database = getDb()) {
@@ -116,7 +116,7 @@ export function seedDemoRecords(database = getDb()) {
     `INSERT OR IGNORE INTO incidents (id, title, status, priority, department, owner, created_at, updated_at, data)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
-  for (const rec of seedRecords) {
+  for (const rec of allSeedRecords) {
     const createdAt = rec.auditTrail?.[0]?.at ?? rec.createdAt ?? new Date().toISOString();
     const info = insert.run(
       rec.id,
