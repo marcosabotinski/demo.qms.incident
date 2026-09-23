@@ -1,0 +1,17 @@
+{
+  "name": "demo.qms.incident",
+  "private": true,
+  "workspaces": [
+    "api",
+    "web"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev -w api\" \"npm run dev -w web\"",
+    "seed": "npm run seed --workspace api --",
+    "start": "npm run start -w api",
+    "test": "npm run test -w api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

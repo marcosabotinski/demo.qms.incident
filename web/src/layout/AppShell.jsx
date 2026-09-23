@@ -3,9 +3,6 @@ import { NavLink, Outlet, useLocation } from "react-router-dom";
 const links = [
   { to: "/", label: "Dashboard", end: true },
   { to: "/incidents", label: "Incidents" },
-  { to: "/deviations", label: "Deviations", soon: true },
-  { to: "/capa", label: "CAPA", soon: true },
-  { to: "/documents", label: "Documents", soon: true },
 ];
 
 function crumb(pathname) {
@@ -13,9 +10,7 @@ function crumb(pathname) {
   if (pathname.startsWith("/incidents/new")) return "Quality / Incidents / New record";
   if (pathname.startsWith("/incidents/")) return "Quality / Incidents / Record";
   if (pathname.startsWith("/incidents")) return "Quality / Incidents";
-  if (pathname.startsWith("/deviations")) return "Quality / Deviations";
-  if (pathname.startsWith("/capa")) return "Quality / CAPA";
-  return "Aether QMS";
+  return "Acme Quality";
 }
 
 export default function AppShell() {
@@ -26,7 +21,7 @@ export default function AppShell() {
         <div className="brand">
           <div className="brand-mark">AQ</div>
           <div>
-            <h1>Aether QMS</h1>
+            <h1>Acme Quality</h1>
             <p>Berlin Lab</p>
           </div>
         </div>
@@ -34,7 +29,6 @@ export default function AppShell() {
           {links.map((l) => (
             <NavLink key={l.to} to={l.to} end={l.end} className={({ isActive }) => (isActive ? "active" : "")}>
               {l.label}
-              {l.soon ? <span className="soon">Soon</span> : null}
             </NavLink>
           ))}
         </nav>
@@ -49,7 +43,7 @@ export default function AppShell() {
       <div className="main">
         <header className="topbar">
           <div className="crumb">
-            <strong>Aether Diagnostics</strong> · {crumb(pathname)}
+            <strong>Acme Quality</strong> · {crumb(pathname)}
           </div>
           <input className="search" placeholder="Search records, equipment, SOP…" disabled />
         </header>

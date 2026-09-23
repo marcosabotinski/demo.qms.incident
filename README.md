@@ -1,56 +1,50 @@
 # demo.qms.incident
 
-Mock eQMS for a lab quality-incident demo. The working path is **create a quality incident**; the rest of the record is shown so the UI looks like a real system.
+Mock eQMS for a lab quality-incident workshop. The working path is **create a quality incident**, then list and open the record. The rest of the UI is chrome so it looks like a real system.
 
-## Run with Podman
+Acme Quality branding. No Docker required.
+
+## Run (default — no Docker)
 
 ```bash
-podman machine start   # if the local machine is stopped
+npm install
+npm run seed
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173).
+
+- Home is a thin quality-incident list plus **New incident**
+- **Incidents** is the inbox
+- **Create incident** persists a `Draft` record in a local SQLite file
+
+SQLite path: `api/data/qms.sqlite` (override with `SQLITE_PATH`). Vite proxies `/api` and `/demo` to the API on port 4000.
+
+Re-seed without wiping extra records:
+
+```bash
+npm run seed
+```
+
+Wipe the file DB and restore only the demo records:
+
+```bash
+npm run seed -- --reset
+```
+
+## Optional / legacy: Compose
+
+Podman or Docker Compose is optional. Prefer the npm path above.
+
+```bash
 podman compose up --build
 ```
 
-Open [http://localhost:8080](http://localhost:8080).
+Compose no longer starts Postgres. The API uses a SQLite volume.
 
-- Dashboard is the start page
-- **Incidents** is the inbox
-- **Create incident** persists a `Draft` record in Postgres
+## Workshop
 
-## Local development (without containers)
-
-Postgres must be reachable at `postgres://qms:qms@localhost:5432/qms`.
-
-```bash
-# terminal 1
-cd api && npm install && DATABASE_URL=postgres://qms:qms@localhost:5432/qms npm start
-
-# terminal 2
-cd web && npm install && npm run dev
-```
-
-Vite proxies `/api` and `/demo` to the API on port 4000.
-
-## Deploy to AWS
-
-`scripts/deploy-aws.sh` creates a `t3.small` in `us-east-1`, attaches an NSG (security group) that allows HTTP `:80` and SSH only from **your current public IP**, copies this repo onto the VM, and starts `compose.aws.yml` (Postgres + API + nginx frontend).
-
-Stop the instance when you are not demoing it. Compute and the public IPv4 fee stop; the 8 GB root volume is about **$0.64/month**. `./scripts/destroy-aws.sh` is the $0 teardown.
-
-```bash
-# needs terraform + AWS credentials (env vars or ~/.aws)
-./scripts/deploy-aws.sh
-```
-
-The script prints `http://<public-ip>`. Postgres and the API are not published on the host; nginx on port 80 proxies `/api` and `/demo`.
-
-Optional env vars: `ALLOWED_CIDR` (skip IP detection), `AWS_REGION`, `INSTANCE_TYPE`.
-
-State lives at `infra/aws/terraform.tfstate` (local backend). Commit it if you want to keep the VM in git. The operator key stays in `infra/aws/.ssh/` and is gitignored.
-
-Tear down:
-
-```bash
-./scripts/destroy-aws.sh
-```
+Exercise titles are in `LAB.md`. `.cursor/rules` is empty on purpose.
 
 ## Seeded records
 
