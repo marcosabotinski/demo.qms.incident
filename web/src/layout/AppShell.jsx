@@ -15,7 +15,7 @@ function crumb(pathname) {
   if (pathname.startsWith("/incidents")) return "Quality / Incidents";
   if (pathname.startsWith("/deviations")) return "Quality / Deviations";
   if (pathname.startsWith("/capa")) return "Quality / CAPA";
-  return "Aether QMS";
+  return "Acme Quality";
 }
 
 export default function AppShell() {
@@ -26,7 +26,7 @@ export default function AppShell() {
         <div className="brand">
           <div className="brand-mark">AQ</div>
           <div>
-            <h1>Aether QMS</h1>
+            <h1>Acme Quality</h1>
             <p>Berlin Lab</p>
           </div>
         </div>
@@ -49,7 +49,7 @@ export default function AppShell() {
       <div className="main">
         <header className="topbar">
           <div className="crumb">
-            <strong>Aether Diagnostics</strong> · {crumb(pathname)}
+            <strong>Acme Quality</strong> · {crumb(pathname)}
           </div>
           <input className="search" placeholder="Search records, equipment, SOP…" disabled />
         </header>
