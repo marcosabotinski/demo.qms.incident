@@ -15,14 +15,21 @@ export default function Dashboard() {
     <div>
       <div className="page-head">
         <div>
-          <h2>Quality incidents</h2>
-          <p>Recent quality incidents for the Berlin Lab</p>
+          <h2>Quality overview</h2>
+          <p>Incident metrics and recent activity for the Berlin Lab</p>
         </div>
         <Link className="btn" to="/incidents/new">
           New incident
         </Link>
       </div>
       {err ? <p className="error">{err}</p> : null}
+      <div className="kpis">
+        <div className="kpi">
+          <div className="label">Total incidents</div>
+          <div className="value">{rows.length}</div>
+          <div className="hint">All records, all statuses</div>
+        </div>
+      </div>
       <div className="card">
         <h3>Recent records</h3>
         <table>

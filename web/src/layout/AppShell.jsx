@@ -3,9 +3,6 @@ import { NavLink, Outlet, useLocation } from "react-router-dom";
 const links = [
   { to: "/", label: "Dashboard", end: true },
   { to: "/incidents", label: "Incidents" },
-  { to: "/deviations", label: "Deviations", soon: true },
-  { to: "/capa", label: "CAPA", soon: true },
-  { to: "/documents", label: "Documents", soon: true },
 ];
 
 function crumb(pathname) {
@@ -13,8 +10,6 @@ function crumb(pathname) {
   if (pathname.startsWith("/incidents/new")) return "Quality / Incidents / New record";
   if (pathname.startsWith("/incidents/")) return "Quality / Incidents / Record";
   if (pathname.startsWith("/incidents")) return "Quality / Incidents";
-  if (pathname.startsWith("/deviations")) return "Quality / Deviations";
-  if (pathname.startsWith("/capa")) return "Quality / CAPA";
   return "Acme Quality";
 }
 
@@ -34,7 +29,6 @@ export default function AppShell() {
           {links.map((l) => (
             <NavLink key={l.to} to={l.to} end={l.end} className={({ isActive }) => (isActive ? "active" : "")}>
               {l.label}
-              {l.soon ? <span className="soon">Soon</span> : null}
             </NavLink>
           ))}
         </nav>
