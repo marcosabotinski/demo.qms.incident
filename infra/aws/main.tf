@@ -32,8 +32,19 @@ data "aws_ami" "al2023" {
   }
 }
 
+data "cloudflare_ip_ranges" "cloudflare" {}
+
 locals {
   allowed_cidr = var.allowed_cidr != "" ? var.allowed_cidr : "${trimspace(data.http.operator_ip[0].response_body)}/32"
+  # Zone IP Access Rules: /32 must be target "ip" without the suffix; anything
+  # else is ip_range (/16 and /24 are what Cloudflare actually accepts).
+  allow_access_rules = {
+    for c in var.allow_cidrs :
+    c => {
+      target = endswith(c, "/32") ? "ip" : "ip_range"
+      value  = endswith(c, "/32") ? trimsuffix(c, "/32") : c
+    }
+  }
 }
 
 resource "aws_vpc" "demo" {
@@ -83,10 +94,9 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
-# AWS equivalent of an NSG: only the operator IP can hit SSH or the HTTP frontend.
 resource "aws_security_group" "nsg" {
-  name        = "${var.name}-nsg"
-  description = "Restrict SSH and HTTP to the operator public IP"
+  name_prefix = "${var.name}-nsg-"
+  description = "SSH from operator; HTTP from Cloudflare ranges only"
   vpc_id      = aws_vpc.demo.id
 
   ingress {
@@ -98,11 +108,11 @@ resource "aws_security_group" "nsg" {
   }
 
   ingress {
-    description = "HTTP frontend from operator"
+    description = "HTTP from Cloudflare proxy ranges"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = [local.allowed_cidr]
+    cidr_blocks = data.cloudflare_ip_ranges.cloudflare.ipv4_cidrs
   }
 
   egress {
@@ -115,6 +125,10 @@ resource "aws_security_group" "nsg" {
 
   tags = {
     Name = "${var.name}-nsg"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -147,5 +161,49 @@ resource "aws_instance" "demo" {
 
   tags = {
     Name = var.name
+  }
+}
+
+resource "aws_eip" "demo" {
+  domain     = "vpc"
+  depends_on = [aws_internet_gateway.demo]
+
+  tags = {
+    Name = var.name
+  }
+}
+
+resource "aws_eip_association" "demo" {
+  instance_id   = aws_instance.demo.id
+  allocation_id = aws_eip.demo.id
+}
+
+resource "cloudflare_dns_record" "demo" {
+  zone_id = var.cloudflare_zone_id
+  name    = var.hostname
+  type    = "A"
+  content = aws_eip.demo.public_ip
+  proxied = true
+  ttl     = 1
+}
+
+resource "cloudflare_zone_setting" "ssl" {
+  zone_id    = var.cloudflare_zone_id
+  setting_id = "ssl"
+  value      = "flexible"
+}
+
+# Zone-scoped IP Access Rules ("this website" in the dashboard). Free-plan
+# tool. They apply to every hostname in the zone; whitelist skips security
+# for those IPs but does not deny everyone else.
+resource "cloudflare_access_rule" "visitor_allow" {
+  for_each = local.allow_access_rules
+
+  zone_id = var.cloudflare_zone_id
+  mode    = "whitelist"
+  notes   = "${var.name} visitor allow ${each.key}"
+  configuration = {
+    target = each.value.target
+    value  = each.value.value
   }
 }

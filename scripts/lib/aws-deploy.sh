@@ -1,6 +1,51 @@
 # Shared helpers for deploy-aws.sh / destroy-aws.sh / tests.
 # shellcheck shell=bash
 
+# Load ${root}/.env if present. Shell-exported values win; empty/unset keys
+# are filled from the file. Never prints values.
+load_dotenv() {
+  local root="${1-}"
+  local env_file="${root}/.env"
+  [[ -n "$root" && -f "$env_file" ]] || return 0
+
+  local line key value
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line%$'\r'}"
+    [[ "$line" =~ ^[[:space:]]*(#|$) ]] && continue
+
+    line="${line#"${line%%[![:space:]]*}"}"
+    if [[ "$line" =~ ^export[[:space:]]+ ]]; then
+      line="${line#export}"
+      line="${line#"${line%%[![:space:]]*}"}"
+    fi
+
+    [[ "$line" == *=* ]] || continue
+    key="${line%%=*}"
+    value="${line#*=}"
+    key="${key%"${key##*[![:space:]]}"}"
+    [[ "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
+
+    # Already-exported (non-empty) env wins over .env.
+    [[ -n "${!key:-}" ]] && continue
+
+    value="${value#"${value%%[![:space:]]*}"}"
+    value="${value%"${value##*[![:space:]]}"}"
+    case "$value" in
+      '"'?*'"')
+        value="${value#\"}"
+        value="${value%\"}"
+        ;;
+      "'"?*"'")
+        value="${value#\'}"
+        value="${value%\'}"
+        ;;
+    esac
+
+    printf -v "$key" '%s' "$value"
+    export "$key"
+  done < "$env_file"
+}
+
 normalize_cidr() {
   local raw="${1-}"
   raw="$(printf '%s' "$raw" | tr -d '[:space:]')"
@@ -43,6 +88,30 @@ require_cmd() {
       return 1
     fi
   done
+}
+
+normalize_hostname() {
+  local raw="${1-}"
+  raw="$(printf '%s' "$raw" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')"
+  raw="${raw#http://}"
+  raw="${raw#https://}"
+  raw="${raw%%/*}"
+  if [[ ! "$raw" =~ ^[a-z0-9]([a-z0-9.-]*[a-z0-9])?\.[a-z]{2,}$ ]]; then
+    echo "Expected a DNS hostname (for example demo.example.com), got: ${1-}" >&2
+    return 1
+  fi
+  printf '%s\n' "$raw"
+}
+
+tf_string_list() {
+  local first=1 item out="["
+  for item in "$@"; do
+    [[ "$first" -eq 1 ]] || out+=","
+    first=0
+    out+="\"${item}\""
+  done
+  out+="]"
+  printf '%s\n' "$out"
 }
 
 compose_aws_host_ports() {

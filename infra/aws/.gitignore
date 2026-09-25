@@ -3,3 +3,4 @@
 *.tfstate.backup
 crash.log
 .terraform.tfstate.lock.info
+*.auto.tfvars

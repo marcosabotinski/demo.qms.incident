@@ -2,6 +2,8 @@ node_modules
 dist
 .DS_Store
 *.log
+.env
+!.env.example
 
 # AWS deploy: local Terraform backend. Commit terraform.tfstate if you want
 # the VM tracked in git. Never commit the operator SSH key.
@@ -10,3 +12,4 @@ infra/aws/.ssh/
 infra/aws/*.tfstate.backup
 infra/aws/crash.log
 infra/aws/.terraform.tfstate.lock.info
+infra/aws/*.auto.tfvars
