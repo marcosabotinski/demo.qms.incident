@@ -408,15 +408,58 @@ else
   failed=1
 fi
 
-env -u CLOUDFLARE_API_TOKEN -u CF_ZONE_ID "$ROOT/scripts/allow-my-ip.sh" >/tmp/allow-my-ip-missing.out 2>/tmp/allow-my-ip-missing.err && rc=0 || rc=$?
+# Run a copy of the script. Its ROOT is this temp tree, so load_dotenv cannot
+# see the repo .env or a home-directory .env. A curl stub is first on PATH so
+# this case cannot reach the Cloudflare API even if a credential leaked in.
+isolate="$(mktemp -d)"
+mkdir -p "$isolate/project/scripts/lib" "$isolate/home" "$isolate/bin"
+cp "$ROOT/scripts/allow-my-ip.sh" "$isolate/project/scripts/allow-my-ip.sh"
+cp "$ROOT/scripts/lib/aws-deploy.sh" "$isolate/project/scripts/lib/aws-deploy.sh"
+cp "$ROOT/scripts/lib/cf-allow.sh" "$isolate/project/scripts/lib/cf-allow.sh"
+chmod +x "$isolate/project/scripts/allow-my-ip.sh"
+printf '%s\n' 'CLOUDFLARE_API_TOKEN=sentinel-not-a-token' 'CF_ZONE_ID=0123456789abcdef0123456789abcdef' > "$isolate/home/.env"
+cat > "$isolate/bin/curl" <<'EOF'
+#!/bin/sh
+printf '%s\n' "$*" >> "${CURL_BLOCK_LOG:?}"
+exit 97
+EOF
+chmod +x "$isolate/bin/curl"
+: > "$isolate/curl.log"
+if [[ -e "$isolate/project/.env" ]]; then
+  echo "FAIL: isolated script root must not contain .env" >&2
+  failed=1
+else
+  echo "ok  isolated script root has no .env"
+fi
+env -i \
+  HOME="$isolate/home" \
+  PATH="$isolate/bin:/usr/bin:/bin" \
+  CURL_BLOCK_LOG="$isolate/curl.log" \
+  "$isolate/project/scripts/allow-my-ip.sh" \
+  >"$isolate/out" 2>"$isolate/err" && rc=0 || rc=$?
 assert_eq "$rc" "1" "script exits 1 when token and zone are unset"
-if grep -q 'CLOUDFLARE_API_TOKEN' /tmp/allow-my-ip-missing.err && ! grep -q 'Bearer' /tmp/allow-my-ip-missing.err; then
+if grep -q 'CLOUDFLARE_API_TOKEN' "$isolate/err" \
+  && ! grep -q 'Bearer' "$isolate/err" \
+  && ! grep -q 'sentinel-not-a-token' "$isolate/err" "$isolate/out"; then
   echo "ok  script missing-env error does not print a token"
 else
   echo "FAIL: script missing-env error" >&2
   failed=1
 fi
-rm -f /tmp/allow-my-ip-missing.out /tmp/allow-my-ip-missing.err
+if [[ -s "$isolate/curl.log" ]]; then
+  echo "FAIL: missing-env test invoked curl" >&2
+  failed=1
+else
+  echo "ok  missing-env test did not call curl"
+fi
+rm -rf "$isolate"
+
+if grep -q 'load_dotenv "$ROOT"' "$ROOT/scripts/allow-my-ip.sh"; then
+  echo "ok  normal runs still load the repo .env"
+else
+  echo "FAIL: allow-my-ip.sh no longer loads the repo .env" >&2
+  failed=1
+fi
 
 if [[ "$failed" -ne 0 ]]; then
   echo "allow-my-ip tests failed" >&2
