@@ -1,39 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { getIncident } from "../api.js";
-import { BotChip, EmptyQA, formatWhen, PriorityPill, StatusPill } from "../components/Pills.jsx";
+import { EmptyQA, formatWhen, PriorityPill, StatusPill } from "../components/Pills.jsx";
 
-const BOT_FIELDS = new Set([
-  "title",
-  "priority",
-  "sourceChannel",
-  "sourceRef",
-  "site",
-  "department",
-  "area",
-  "occurredAt",
-  "discoveredAt",
-  "reportedByName",
-  "summary",
-  "description",
-  "immediateActions",
-  "category",
-  "nature",
-  "equipmentName",
-  "equipmentId",
-  "expectedValue",
-  "actualValue",
-  "batchLots",
-  "limsSampleIds",
-]);
-
-function Field({ label, children, bot, full }) {
+function Field({ label, children, full }) {
   return (
     <div className={`field ${full ? "full" : ""}`}>
-      <label>
-        {label}
-        {bot ? <BotChip /> : null}
-      </label>
+      <label>{label}</label>
       <div className="val">{children ?? <EmptyQA />}</div>
     </div>
   );
@@ -62,9 +35,6 @@ export default function IncidentDetail() {
   if (err) return <p className="error">{err}</p>;
   if (!rec) return <p className="muted">Loading record…</p>;
 
-  const bot = rec.sourceChannel === "Slack" || rec.draftedFromSlack;
-  const showBot = (key) => bot && BOT_FIELDS.has(key);
-
   return (
     <div>
       <div className="page-head">
@@ -78,10 +48,6 @@ export default function IncidentDetail() {
           <button className="btn secondary">Cancel</button>
         </div>
       </div>
-
-      {bot ? (
-        <div className="banner">Drafted from Slack by Quality Bot · awaiting QA review</div>
-      ) : null}
 
       <div className="record-header">
         <div className="meta">
@@ -123,31 +89,25 @@ export default function IncidentDetail() {
           <div className="section">
             <h3>Intake</h3>
             <div className="fields">
-              <Field label="Occurred" bot={showBot("occurredAt")}>
-                {formatWhen(rec.occurredAt)}
-              </Field>
-              <Field label="Discovered" bot={showBot("discoveredAt")}>
-                {formatWhen(rec.discoveredAt)}
-              </Field>
-              <Field label="Reported by" bot={showBot("reportedByName")}>
+              <Field label="Occurred">{formatWhen(rec.occurredAt)}</Field>
+              <Field label="Discovered">{formatWhen(rec.discoveredAt)}</Field>
+              <Field label="Reported by">
                 {rec.reportedByName}
                 {rec.reportedByRole ? ` · ${rec.reportedByRole}` : ""}
               </Field>
-              <Field label="Category" bot={showBot("category")}>
+              <Field label="Category">
                 {rec.category}
                 {rec.subcategory ? ` / ${rec.subcategory}` : ""}
               </Field>
-              <Field label="Nature" bot={showBot("nature")}>
-                {rec.nature}
-              </Field>
+              <Field label="Nature">{rec.nature}</Field>
               <Field label="Area">{val(rec.area)}</Field>
-              <Field label="Summary" full bot={showBot("summary")}>
+              <Field label="Summary" full>
                 {rec.summary}
               </Field>
-              <Field label="Description" full bot={showBot("description")}>
+              <Field label="Description" full>
                 {rec.description}
               </Field>
-              <Field label="Immediate actions" full bot={showBot("immediateActions")}>
+              <Field label="Immediate actions" full>
                 {rec.immediateActions}
               </Field>
             </div>
@@ -155,23 +115,15 @@ export default function IncidentDetail() {
           <div className="section">
             <h3>Lab context</h3>
             <div className="fields">
-              <Field label="Equipment" bot={showBot("equipmentName")}>
-                {val(rec.equipmentName)}
-              </Field>
-              <Field label="Equipment ID" bot={showBot("equipmentId")}>
-                {val(rec.equipmentId)}
-              </Field>
-              <Field label="Expected" bot={showBot("expectedValue")}>
-                {val(rec.expectedValue)}
-              </Field>
-              <Field label="Actual" bot={showBot("actualValue")}>
+              <Field label="Equipment">{val(rec.equipmentName)}</Field>
+              <Field label="Equipment ID">{val(rec.equipmentId)}</Field>
+              <Field label="Expected">{val(rec.expectedValue)}</Field>
+              <Field label="Actual">
                 {val(rec.actualValue)} {rec.unit || ""}
               </Field>
               <Field label="SOP">{val(rec.sopId)}</Field>
-              <Field label="LIMS IDs" bot={showBot("limsSampleIds")}>
-                {val(rec.limsSampleIds)}
-              </Field>
-              <Field label="Batches" full bot={showBot("batchLots")}>
+              <Field label="LIMS IDs">{val(rec.limsSampleIds)}</Field>
+              <Field label="Batches" full>
                 {rec.batchLots?.length
                   ? rec.batchLots.map((b) => `${b.product || "—"} ${b.batchNo} (${b.stage})`).join(" · ")
                   : null}

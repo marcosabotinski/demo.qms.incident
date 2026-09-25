@@ -4,12 +4,8 @@
   "start": "bash .cursor/start.sh",
   "terminals": [
     {
-      "name": "api",
-      "command": "cd api && DATABASE_URL=postgres://qms:qms@localhost:5432/qms PORT=4000 npm start"
-    },
-    {
-      "name": "web",
-      "command": "cd web && npm run dev"
+      "name": "app",
+      "command": "npm run dev"
     }
   ]
 }

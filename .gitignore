@@ -4,6 +4,10 @@ dist
 *.log
 .env
 !.env.example
+api/data/*.sqlite
+api/data/*.sqlite-journal
+api/data/*.sqlite-wal
+api/data/*.sqlite-shm
 
 # AWS deploy: local Terraform backend. Commit terraform.tfstate if you want
 # the VM tracked in git. Never commit the operator SSH key.
