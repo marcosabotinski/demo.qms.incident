@@ -5,9 +5,9 @@ variable "name" {
 }
 
 variable "aws_region" {
-  description = "AWS region. us-east-1 is the usual free-tier default."
+  description = "AWS region. eu-central-1 (Frankfurt) is the default."
   type        = string
-  default     = "us-east-1"
+  default     = "eu-central-1"
 }
 
 variable "instance_type" {
@@ -16,8 +16,34 @@ variable "instance_type" {
   default     = "t3.small"
 }
 
+variable "hostname" {
+  description = "Public DNS name (Cloudflare-proxied A record). Browser HTTPS is at https://<hostname>."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[a-z0-9]([a-z0-9.-]*[a-z0-9])?\\.[a-z]{2,}$", var.hostname))
+    error_message = "hostname must be a DNS name with a dot (for example demo.example.com)."
+  }
+}
+
+variable "cloudflare_zone_id" {
+  description = "Cloudflare zone ID that owns hostname. Token comes from CLOUDFLARE_API_TOKEN, not this variable."
+  type        = string
+}
+
+variable "allow_cidrs" {
+  description = "IPv4 CIDRs to whitelist via zone IP Access Rules. Empty creates no rules."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = alltrue([for c in var.allow_cidrs : can(cidrhost(c, 0))])
+    error_message = "allow_cidrs must be a list of valid CIDRs (for example 203.0.113.10/32)."
+  }
+}
+
 variable "allowed_cidr" {
-  description = "CIDR allowed to reach SSH and HTTP. Empty = detect the apply-er public IP."
+  description = "CIDR allowed to SSH to the instance. Empty = detect the apply-er public IP."
   type        = string
   default     = ""
 

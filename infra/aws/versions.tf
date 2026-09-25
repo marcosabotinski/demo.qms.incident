@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.80"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 5"
+    }
     http = {
       source  = "hashicorp/http"
       version = "~> 3.4"
@@ -28,3 +32,6 @@ provider "aws" {
     }
   }
 }
+
+# Auth: CLOUDFLARE_API_TOKEN in the environment. Do not put a token in tfvars.
+provider "cloudflare" {}

@@ -2,6 +2,8 @@ node_modules
 dist
 .DS_Store
 *.log
+.env
+!.env.example
 api/data/*.sqlite
 api/data/*.sqlite-journal
 api/data/*.sqlite-wal
@@ -14,3 +16,4 @@ infra/aws/.ssh/
 infra/aws/*.tfstate.backup
 infra/aws/crash.log
 infra/aws/.terraform.tfstate.lock.info
+infra/aws/*.auto.tfvars
