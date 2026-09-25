@@ -196,6 +196,9 @@ resource "cloudflare_zone_setting" "ssl" {
 # Zone-scoped IP Access Rules ("this website" in the dashboard). Free-plan
 # tool. They apply to every hostname in the zone; whitelist skips security
 # for those IPs but does not deny everyone else.
+# scripts/allow-my-ip.sh adds bot addresses through the Cloudflare API.
+# Those rules are outside this for_each. Do not replace it with a resource
+# that reconciles every zone access rule; apply would delete the bot CIDRs.
 resource "cloudflare_access_rule" "visitor_allow" {
   for_each = local.allow_access_rules
 

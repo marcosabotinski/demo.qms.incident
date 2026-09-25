@@ -65,6 +65,14 @@ CLOUDFLARE_API_TOKEN=... CF_ZONE_ID=... DEMO_HOSTNAME=test.example.com ./scripts
 
 IP Access Rules and SSH default to your current public IP. Region is `eu-central-1`; instance type is `t3.small`.
 
+A machine that needs to reach the site can add its own current public IPv4 and IPv6 to that same zone allowlist without Terraform:
+
+```bash
+CLOUDFLARE_API_TOKEN=... CF_ZONE_ID=... ./scripts/allow-my-ip.sh
+```
+
+`CLOUDFLARE_API_TOKEN` for this command needs **Account Firewall Access Rules Edit** (write) on the account that owns the zone. `CF_ZONE_ID` is that zone. A gitignored `.env` is loaded the same way as deploy; already-exported values win. The script does not print the token. A missing address family is skipped. Addresses that are already listed are left as they are. Rules it creates sit outside `var.allow_cidrs`, so a later `terraform apply` does not delete them. `destroy-aws.sh` only removes the Terraform-managed rules.
+
 Postgres and the API are not published on the host; nginx on origin `:80` proxies `/api` and `/demo`. Visitors hit `https://<hostname>` via Cloudflare.
 
 **Security note:** Flexible leaves the Cloudflare→origin hop unencrypted. Locking `:80` to Cloudflare IP ranges is not cryptographic origin authentication. Zone IP Access Rules apply to **the whole zone**, not just `DEMO_HOSTNAME`, and a whitelist skips security for those IPs — it does **not** deny everyone else (that needs WAF custom rules, which this zone already has a ruleset for). Hardening is Authenticated Origin Pulls and/or SSL Full (strict) with an Origin CA certificate on the box.
