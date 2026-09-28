@@ -1,5 +1,0 @@
-.terraform/
-.ssh/
-*.tfstate.backup
-crash.log
-.terraform.tfstate.lock.info
