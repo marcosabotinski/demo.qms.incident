@@ -6,8 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "seed": "node src/seed-cli.js",
-    "test": "node --test --test-concurrency=1 src/*.test.js"
+    "seed": "node src/seed-cli.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.10.0",
