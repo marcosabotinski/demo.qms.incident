@@ -45,7 +45,7 @@ export default function AppShell() {
           <div className="crumb">
             <strong>Acme Quality</strong> · {crumb(pathname)}
           </div>
-          <input className="search" placeholder="Search records, equipment, SOP…" disabled />
+          <input className="search" placeholder="Search incidents…" disabled />
         </header>
         <div className="content">
           <Outlet />
