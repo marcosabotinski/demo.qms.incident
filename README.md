@@ -4,6 +4,10 @@ Mock eQMS for a lab quality-incident workshop. The working path is **create a qu
 
 Acme Quality branding. No Docker required.
 
+## Requirements
+
+Node.js 24 LTS. The API uses `better-sqlite3` 13, which ships prebuilt binaries for Node.js 24 and the current Node.js release, so `npm install` does not need a C++ toolchain.
+
 ## Run (default — no Docker)
 
 ```bash
