@@ -1,5 +1,4 @@
-FROM docker.io/library/node:22-alpine
-RUN apk add --no-cache python3 make g++
+FROM docker.io/library/node:24-alpine
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install --omit=dev
